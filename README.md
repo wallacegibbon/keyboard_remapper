@@ -117,10 +117,25 @@ Layers can be activated momentarily or permanently:
    - **`when_press`**: While the `remap_key` is held down, the layer specified by `when_press` is active.
    - **`when_doublepress`**: While the `remap_key` is tap&pressed, the layer specified by `when_doublepress` is active.
 
+   It is possible to use a non-modifier key as a dual-role key to enable a layer. Here’s a configuration example:
+
+   ```
+   remap_key=TAB
+   when_alone=TAB
+   with_other=
+   when_press=layer_tab
+   ```
+
+   Explanation:
+
+   - **`with_other=`**: This setting allows the TAB key to function as a dual-role key, where the tap action is registered as TAB and the hold action is set to nothing.
+   - **`when_press=layer_tab`**: When the TAB key is pressed, it activates the `layer_tab` without registering the TAB key itself if it is held beyond the `tap_timeout`.
+
    To enable a layer with multiple key presses it is possibile to use `define_layer` as in the following configuration example:
 
    ```
    define_layer=layer_vi
+   or_layer=layer_tab
    and_layer=layer_ctrl
    and_layer=layer_win
    and_not_layer=layer_shift
@@ -129,9 +144,18 @@ Layers can be activated momentarily or permanently:
    Explanation:
 
    - **`define_layer=layer_vi`**: This line specifies that you are defining the `layer_vi`. This is the primary layer that will be activated when the conditions are met.
-   - **`and_layer=layer_ctrl`**: This indicates that the `layer_ctrl` must also be active for `layer_vi` to be enabled. This allows you to combine multiple layers for more complex key remapping.
-   - **`and_layer=layer_win`**: Similarly, this specifies that `layer_win` must also be active to enable `layer_vi`. This means that all specified layers must be active simultaneously for the remappings of `layer_vi` to take effect.
+   - **`or_layer=layer_tab`**: This indicates that if the `layer_tab` is active, then the `layer_vi` is also active.
+   - **`and_layer=layer_ctrl`**: This indicates that the `layer_ctrl` must also be active for `layer_vi` to be enabled if `layer_tab` is not active. This allows you to combine multiple layers for more complex key remapping.
+   - **`and_layer=layer_win`**: Similarly, this specifies that `layer_win` must also be active to enable `layer_vi`. This means that all specified layers by `and_layer=` must be active simultaneously for the remappings of `layer_vi` to take effect.
    - **`and_not_layer=layer_shift`**: This setting specifies that `layer_shift` must **not** be active to enable `layer_vi`.
+
+   The logic to enable a layer can be expressed as follows:
+
+   `or_layer` OR `or_layer` OR ... OR (`and_layer` AND `and_layer` AND NOT `and_not_layer` AND ...)
+
+   This means that `layer_vi` will be active if either `layer_tab` is active, or both `layer_ctrl` and `layer_win` are active while `layer_shift` is not.
+
+   If a layer is defined with `define_layer` and activated by `when_press` or `when_doublepress`, an implicit `or_layer` is created.
 
 2. **Permanent Activation (Lock System)**
 
@@ -225,4 +249,19 @@ The Right ALT key is mapped to multiple keys: CTRL, ALT, SHIFT, and Left WIN.
 The key press sequence follows the order of the `when_alone` lines. Whereas the key release sequence occurs in reverse order.
 
 It is possible to map multiple keys for `when_alone`, `with_other`, `when_doublepress`, `when_tap_lock`, and `when_double_tap_lock`.
+
+### Key list
+
+- CTRL LEFT_CTRL RIGHT_CTRL SHIFT LEFT_SHIFT RIGHT_SHIFT ALT LEFT_ALT RIGHT_ALT LEFT_WIN RIGHT_WIN
+- BACKSPACE CAPSLOCK ENTER ESCAPE SPACE TAB PLUS COMMA MINUS PERIOD
+- UP LEFT RIGHT DOWN
+- F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12 F13 F14 F15 F16 F17 F18 F19 F20 F21 F22 F23 F24
+- KEY_0 KEY_1 KEY_2 KEY_3 KEY_4 KEY_5 KEY_6 KEY_7 KEY_8 KEY_9
+- KEY_A KEY_B KEY_C KEY_D KEY_E KEY_F KEY_G KEY_H KEY_I KEY_J KEY_K KEY_L KEY_M KEY_N KEY_O KEY_P KEY_Q KEY_R KEY_S KEY_T KEY_U KEY_V KEY_W KEY_X KEY_Y KEY_Z
+- INSERT DELETE HOME END PAGE_UP PAGE_DOWN PRINT_SCREEN NUMLOCK SCROLLLOCK PAUSE US_SEMI US_SLASH US_TILDE
+- MOUSE_UP MOUSE_DOWN MOUSE_LEFT MOUSE_RIGHT
+- MOUSE_FORWARD MOUSE_BACKWARD MOUSE_STEER_LEFT MOUSE_STEER_RIGHT
+- MOUSE_WHEEL_UP MOUSE_WHEEL_DOWN MOUSE_WHEEL_LEFT MOUSE_WHEEL_RIGHT
+- MOUSE_LBUTTON MOUSE_RBUTTON MOUSE_MBUTTON MOUSE_XBUTTON1 MOUSE_XBUTTON2
+- MOUSE_SBUTTON MOUSE_SHOLD MOUSE_SRELEASE MOUSE_LBUTTON_SEL MOUSE_RBUTTON_SEL MOUSE_MBUTTON_SEL MOUSE_XBUTTON1_SEL MOUSE_XBUTTON2_SEL
 

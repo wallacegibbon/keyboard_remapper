@@ -20,6 +20,11 @@ remap_key=LEFT_WIN
 with_other=LEFT_WIN
 when_press=layer_win
 
+remap_key=TAB
+when_alone=TAB
+with_other=
+when_press=layer_tab
+
 # hyper key with simple remapping
 remap_key=RIGHT_ALT
 when_alone=CTRL
@@ -58,6 +63,7 @@ when_doublepress=layer_mouse
 
 # layer definition
 define_layer=layer_vi
+or_layer=layer_tab
 and_layer=layer_ctrl_win
 and_not_layer=layer_alt
 and_not_layer=layer_shift
