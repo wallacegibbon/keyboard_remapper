@@ -77,10 +77,12 @@ when_double_tap_lock=LEFT_CTRL
 
 Explanation:
 
-- **`when_tap_lock`**: If the `remap_key` is tapped, the assigned key (LEFT_SHIFT) is locked in that state until it is tapped again. This allows users to  maintain the shift state without needing to hold the key.
+- **`when_tap_lock`**: If the `remap_key` is tapped, the assigned key (LEFT_SHIFT) is locked in that state until it is tapped again. This allows users to maintain the shift state without needing to hold the key.
 - **`when_double_tap_lock`**: If the `remap_key` is double tapped, the assigned key (LEFT_CTRL) is locked in that state until a subsequent double tap of the `remap_key`. This provides a way to maintain control functionality without holding the key.
 
 This configuration enhances the flexibility of key usage, allowing for both temporary and persistent key states based on user input patterns.
+
+If both `when_tap_lock` and `when_double_tap_lock` are defined, and `when_double_tap_lock` is triggered, the action associated with `when_tap_lock` will be reverted.
 
 ### Layers
 
@@ -97,6 +99,8 @@ when_alone=LEFT
 Explanation:
 
 - **`layer`**: The `remap_key` remapping is enabled if the layer specified by `layer` is active. The name of specified layer has to start with "layer". In this example its name is "layer_vi".
+
+If a key has different remappings associated with different enabling layers, and some of these layers are enabled simultaneously, then priority goes to the last defined remapping in the config.txt file.
 
 Layers can be activated momentarily or permanently:
 
@@ -159,7 +163,7 @@ Layers can be activated momentarily or permanently:
 
 2. **Permanent Activation (Lock System)**
 
-   A layer can also be activated  permanently using a lock mechanism. This means that once the layer is  activated, all remappings associated with it remain in effect until the  layer is explicitly deactivated.
+   A layer can also be activated permanently using a lock mechanism. This means that once the layer is activated, all remappings associated with it remain in effect until the layer is explicitly deactivated.
 
    Configuration example:
 
@@ -264,4 +268,21 @@ It is possible to map multiple keys for `when_alone`, `with_other`, `when_double
 - MOUSE_WHEEL_UP MOUSE_WHEEL_DOWN MOUSE_WHEEL_LEFT MOUSE_WHEEL_RIGHT
 - MOUSE_LBUTTON MOUSE_RBUTTON MOUSE_MBUTTON MOUSE_XBUTTON1 MOUSE_XBUTTON2
 - MOUSE_SBUTTON MOUSE_SHOLD MOUSE_SRELEASE MOUSE_LBUTTON_SEL MOUSE_RBUTTON_SEL MOUSE_MBUTTON_SEL MOUSE_XBUTTON1_SEL MOUSE_XBUTTON2_SEL
+
+
+## Installation
+
+1. Download and unzip the latest [release](https://github.com/ulixxe/keyboard_remapper/releases).
+2. Put both `keyboard_remapper.exe` and `config.txt` in a permanent directory of your choice. (e.g. `C:\Program Files\keyboard_remapper`).
+3. Create a shortcut to `keyboard_remapper.exe` in your startup directory (e.g. `C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\keyboard_remapper.lnk`).
+4. Optionally edit `config.txt` and run `keyboard_remapper.exe`.
+
+To uninstall, terminate `keyboard_remapper.exe` from the task manager and remove the startup shortcut.
+
+
+## Building keyboard_remapper.exe
+
+1. Install [Build Tools for Visual Studio 2022](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022).
+2. Launch the "Native Tools Command Prompt for VS 2022".
+3. Run `nmake` to build `keyboard_remapper.exe`.
 

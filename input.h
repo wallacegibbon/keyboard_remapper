@@ -111,8 +111,8 @@ enum Direction {
     DOWN,
 };
 
-void debug_print(const char* color, const char* format, ...);
-void send_input(int scan_code, int virt_code, enum Direction direction, int remap_id, struct InputBuffer *input_buffer);
+void debug_print(const char * color, const char * format, ...);
+void send_input(int scan_code, int virt_code, enum Direction direction, int remap_id, struct InputBuffer * input_buffer);
 void rehook();
 
 #endif

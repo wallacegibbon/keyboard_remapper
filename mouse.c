@@ -117,7 +117,10 @@ void buttons_send(struct MouseState * state, int remap_id, struct InputBuffer * 
     int index;
     n = input_buffer_move_prod_head(input_buffer, &tail);
     index = tail & INPUT_BUFFER_MASK;
-    if (n == 0) return;
+    if (n == 0) {
+        debug_print(RED, "\nError: input buffer is full!");
+        return;
+    }
     ZeroMemory(&input_buffer->inputs[index], sizeof(INPUT));
     input_buffer->inputs[index].type = INPUT_MOUSE;
     input_buffer->inputs[index].mi.dwExtraInfo = (ULONG_PTR)INJECTED_KEY_ID | remap_id;
@@ -169,7 +172,10 @@ void buttons_send(struct MouseState * state, int remap_id, struct InputBuffer * 
             input_buffer_update_tail(&input_buffer->prod, tail, n);
             n = input_buffer_move_prod_head(input_buffer, &tail);
             index = tail & INPUT_BUFFER_MASK;
-            if (n == 0) return;
+            if (n == 0) {
+                debug_print(RED, "\nError: input buffer is full!");
+                return;
+            }
             ZeroMemory(&input_buffer->inputs[index], sizeof(INPUT));
             input_buffer->inputs[index].type = INPUT_MOUSE;
             input_buffer->inputs[index].mi.dwExtraInfo = (ULONG_PTR)INJECTED_KEY_ID | remap_id;
@@ -198,7 +204,10 @@ void move_send(struct MouseState * state, int remap_id, struct InputBuffer * inp
     int index;
     n = input_buffer_move_prod_head(input_buffer, &tail);
     index = tail & INPUT_BUFFER_MASK;
-    if (n == 0) return;
+    if (n == 0) {
+        debug_print(RED, "\nError: input buffer is full!");
+        return;
+    }
     ZeroMemory(&input_buffer->inputs[index], sizeof(INPUT));
     input_buffer->inputs[index].type = INPUT_MOUSE;
     input_buffer->inputs[index].mi.dwExtraInfo = (ULONG_PTR)INJECTED_KEY_ID | remap_id;
@@ -272,7 +281,10 @@ void move_send(struct MouseState * state, int remap_id, struct InputBuffer * inp
             input_buffer_update_tail(&input_buffer->prod, tail, n);
             n = input_buffer_move_prod_head(input_buffer, &tail);
             index = tail & INPUT_BUFFER_MASK;
-            if (n == 0) return;
+            if (n == 0) {
+                debug_print(RED, "\nError: input buffer is full!");
+                return;
+            }
             ZeroMemory(&input_buffer->inputs[index], sizeof(INPUT));
             input_buffer->inputs[index].type = INPUT_MOUSE;
             input_buffer->inputs[index].mi.dwExtraInfo = (ULONG_PTR)INJECTED_KEY_ID | remap_id;

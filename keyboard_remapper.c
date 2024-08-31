@@ -1,4 +1,4 @@
-#define VERSION "1.1.0"
+#define VERSION "1.1.1"
 
 #include <windows.h>
 #include <stdio.h>
@@ -20,7 +20,7 @@ HANDLE ghEvent;
 HANDLE ghTimerQueue = NULL;
 struct InputBuffer g_input_buffer;
 
-void debug_print(const char* color, const char* format, ...) {
+void debug_print(const char * color, const char * format, ...) {
     va_list args;
     va_start(args, format);
 
@@ -37,7 +37,10 @@ void send_input(int scan_code, int virt_code, enum Direction direction, int rema
         int index;
         n = input_buffer_move_prod_head(input_buffer, &tail);
         index = tail & INPUT_BUFFER_MASK;
-        if (n == 0) return;
+        if (n == 0) {
+            debug_print(RED, "\nError: input buffer is full!");
+            return;
+        }
         ZeroMemory(&input_buffer->inputs[index], sizeof(INPUT));
 
         input_buffer->inputs[index].type = INPUT_KEYBOARD;
@@ -88,7 +91,10 @@ LRESULT CALLBACK mouse_callback(int msg_code, WPARAM w_param, LPARAM l_param) {
             int index;
             n = input_buffer_move_prod_head(&g_input_buffer, &tail);
             index = tail & INPUT_BUFFER_MASK;
-            if (n == 0) return 1;
+            if (n == 0) {
+                debug_print(RED, "\nError: input buffer is full!");
+                return 1;
+            }
             ZeroMemory(&g_input_buffer.inputs[index], sizeof(INPUT));
 
             g_input_buffer.inputs[index].type = INPUT_MOUSE;
@@ -246,7 +252,7 @@ int main() {
 
     // Initialization may print errors to stdout, create a console to show that output.
     create_console();
-    printf("%s== keyboard_remapper %s ==%s\n\n", GREEN, VERSION, RESET);
+    debug_print(GREEN, "== keyboard_remapper %s ==\n\n", VERSION);
 
     HANDLE mutex = CreateMutex(NULL, TRUE, "keyboard_remapper.single-instance");
     if (GetLastError() == ERROR_ALREADY_EXISTS)

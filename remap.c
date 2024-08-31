@@ -71,9 +71,9 @@ struct Remap {
     int to_when_double_tap_lock_modifiers;
     int to_when_alone_is_modifier_only;
     int to_when_doublepress_is_modifier_only;
+
     int tap_lock;
     int double_tap_lock;
-
     enum State state;
     DWORD time;
     int active_modifiers;
@@ -176,6 +176,7 @@ void reset_layer_lock(struct Layer * layer) {
 }
 
 int check_layer_state(struct Layer * layer) {
+    if (layer->lock) return 1;
     int state = layer->state;
     if (state) {
         struct Remap * remap_iter = g_remap_list;
@@ -538,16 +539,6 @@ int register_remap(struct Remap * remap) {
     return 0;
 }
 
-struct Remap * find_remap_for_virt_code(struct Remap * list, int virt_code) {
-    while (list) {
-        if (list->from->virt_code == virt_code) {
-            return list;
-        }
-        list = list->next;
-    }
-    return NULL;
-}
-
 int remap_list_depth() {
     int depth = 0;
     struct Remap * remap_iter = g_remap_list;
@@ -678,50 +669,32 @@ int event_remapped_key_down(struct Remap * remap, DWORD time, struct InputBuffer
             send_key_def_input_down("when_alone", remap->to_when_alone, remap->id, 0, input_buffer);
         }
     } else if (remap->state == TAPPED) {
-        if ((g_doublepress_timeout > 0) && (time - remap->time < g_doublepress_timeout)) {
-            remap->time = time;
-            remap->state = DOUBLE_TAP;
-            if (remap->to_when_tap_lock) {
-                remap->tap_lock = 1 - remap->tap_lock;
-                if (remap->tap_lock == 0) {
-                    send_key_def_input_up("when_tap_lock", remap->to_when_tap_lock, remap->id, 0, input_buffer);
-                    remap->active_modifiers = 0;
-                }
-            }
-            struct LayerConf * layer_conf = remap->to_when_tap_lock_layer;
-            while (layer_conf) {
-                layer_conf->layer->lock = layer_conf->layer->prev_lock;
-                set_layer_state(layer_conf->layer, layer_conf->layer->lock);
-                layer_conf = layer_conf->next;
-            }
-            if (remap->to_when_doublepress_layer) {
-                set_layer_state(remap->to_when_doublepress_layer, 1);
-            }
-            if (remap->to_when_doublepress) {
-                send_key_def_input_down("when_doublepress", remap->to_when_doublepress, remap->id, 0, input_buffer);
-                remap->active_modifiers = remap->to_when_doublepress_modifiers;
-            } else if (remap->to_when_doublepress_layer) {
-            } else if (remap->to_when_alone) {
-                send_key_def_input_down("when_alone", remap->to_when_alone, remap->id, 0, input_buffer);
-                remap->active_modifiers = remap->to_when_alone_modifiers;
-            }
-        } else {
-            if (remap->to_with_other || remap->to_with_other_dummy) {
-                remap->time = time;
-                remap->state = HELD_DOWN_ALONE;
-            } else {
-                remap->time = time;
-                remap->state = TAP;
-                if (remap->to_when_alone) {
-                    send_key_def_input_down("when_alone", remap->to_when_alone, remap->id, 0, input_buffer);
-                    remap->active_modifiers = remap->to_when_alone_modifiers;
-                }
-            }
-            if (remap->to_when_press_layer) {
-                set_layer_state(remap->to_when_press_layer, 1);
+        remap->time = time;
+        remap->state = DOUBLE_TAP;
+        if (remap->to_when_tap_lock) {
+            remap->tap_lock = 1 - remap->tap_lock;
+            if (remap->tap_lock == 0) {
+                send_key_def_input_up("when_tap_lock", remap->to_when_tap_lock, remap->id, 0, input_buffer);
+                remap->active_modifiers = 0;
             }
         }
-        append_active_remap(&g_remap_list, remap);
+        struct LayerConf * layer_conf = remap->to_when_tap_lock_layer;
+        while (layer_conf) {
+            layer_conf->layer->lock = layer_conf->layer->prev_lock;
+            set_layer_state(layer_conf->layer, layer_conf->layer->lock);
+            layer_conf = layer_conf->next;
+        }
+        if (remap->to_when_doublepress_layer) {
+            set_layer_state(remap->to_when_doublepress_layer, 1);
+        }
+        if (remap->to_when_doublepress) {
+            send_key_def_input_down("when_doublepress", remap->to_when_doublepress, remap->id, 0, input_buffer);
+            remap->active_modifiers = remap->to_when_doublepress_modifiers;
+        } else if (remap->to_when_doublepress_layer) {
+        } else if (remap->to_when_alone) {
+            send_key_def_input_down("when_alone", remap->to_when_alone, remap->id, 0, input_buffer);
+            remap->active_modifiers = remap->to_when_alone_modifiers;
+        }
     } else if (remap->state == DOUBLE_TAP) {
         if (remap->to_when_doublepress) {
             send_key_def_input_down("when_doublepress", remap->to_when_doublepress, remap->id, 0, input_buffer);
@@ -738,7 +711,10 @@ int event_remapped_key_up(struct Remap * remap, DWORD time, struct InputBuffer *
     if (remap->state == HELD_DOWN_ALONE) {
         if ((g_tap_timeout == 0) || (time - remap->time < g_tap_timeout)) {
             remap->time = time;
-            remap->state = TAPPED;
+            if (g_doublepress_timeout > 0)
+                remap->state = TAPPED;
+            else
+                remap->state = IDLE;
             if (remap->to_when_alone) {
                 send_key_def_input_down("when_alone", remap->to_when_alone, remap->id, 0, input_buffer);
                 send_key_def_input_up("when_alone", remap->to_when_alone, remap->id, 0, input_buffer);
@@ -777,7 +753,10 @@ int event_remapped_key_up(struct Remap * remap, DWORD time, struct InputBuffer *
     } else if (remap->state == TAP) {
         if ((g_tap_timeout == 0) || (time - remap->time < g_tap_timeout)) {
             remap->time = time;
-            remap->state = TAPPED;
+            if (g_doublepress_timeout > 0)
+                remap->state = TAPPED;
+            else
+                remap->state = IDLE;
             if (remap->to_when_alone) {
                 send_key_def_input_up("when_alone", remap->to_when_alone, remap->id, 0, input_buffer);
                 remap->active_modifiers = 0;
@@ -840,7 +819,7 @@ int event_remapped_key_up(struct Remap * remap, DWORD time, struct InputBuffer *
             set_layer_state(remap->to_when_doublepress_layer, remap->to_when_doublepress_layer->lock);
         }
     }
-    if (remap->tap_lock == 0 && remap->double_tap_lock == 0) {
+    if (remap->state == IDLE && remap->tap_lock == 0 && remap->double_tap_lock == 0) {
         remove_active_remap(&g_remap_list, remap);
     }
     return 1;
@@ -926,6 +905,9 @@ int handle_input(int scan_code, int virt_code, enum Direction direction, DWORD t
             rehook();
             g_last_input = time;
         }
+    } else if (scan_code == 0x022A) {
+        // To filter out unwanted key events generated on certain HP laptops
+        block_input = 1;
     } else {
         g_last_input = time;
         if (is_injected) {
@@ -933,7 +915,23 @@ int handle_input(int scan_code, int virt_code, enum Direction direction, DWORD t
             remap_for_input = NULL;
             remap_id = dwExtraInfo & 0x000000FF;
         } else {
-            remap_for_input = find_remap_for_virt_code(g_remap_list, virt_code);
+            struct Remap ** list = &g_remap_list;
+            while (*list) {
+                if ((*list)->state == TAPPED && (time - (*list)->time >= g_doublepress_timeout)) {
+                    (*list)->state = IDLE;
+                    if ((*list)->tap_lock == 0 && (*list)->double_tap_lock == 0) {
+                        struct Remap * elem = *list;
+                        *list = (*list)->next;
+                        elem->next = NULL;
+                        DEBUG(1, debug_print(RED, "\nRemap list depth = %d", remap_list_depth()));
+                        continue;
+                    }
+                } else if ((*list)->from->virt_code == virt_code) {
+                    break;
+                }
+                list = &(*list)->next;
+            }
+            remap_for_input = *list;
             if (remap_for_input == NULL) {
                 struct RemapNode * remap_node_iter = g_remap_array[virt_code & 0xFF];
                 while (remap_node_iter) {
