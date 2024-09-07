@@ -48,7 +48,7 @@ static inline uint32_t input_buffer_move_prod_head(struct InputBuffer * input_bu
         do {
             old = input_buffer->prod;
         } while (old.pos.head != old.pos.tail);
-        if ((INPUT_BUFFER_SIZE - 1 + input_buffer->cons.pos.tail - old.pos.head) & INPUT_BUFFER_MASK == 0)
+        if (INPUT_BUFFER_SIZE - 1 - ((old.pos.head - input_buffer->cons.pos.tail) & INPUT_BUFFER_MASK) == 0)
             return 0;
         new.pos.tail = old.pos.tail;
         new.pos.head = old.pos.head + 1;
@@ -111,6 +111,7 @@ enum Direction {
     DOWN,
 };
 
+void debug_file(const char * message);
 void debug_print(const char * color, const char * format, ...);
 void send_input(int scan_code, int virt_code, enum Direction direction, int remap_id, struct InputBuffer * input_buffer);
 void rehook();

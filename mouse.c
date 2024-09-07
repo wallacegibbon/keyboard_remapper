@@ -118,7 +118,8 @@ void buttons_send(struct MouseState * state, int remap_id, struct InputBuffer * 
     n = input_buffer_move_prod_head(input_buffer, &tail);
     index = tail & INPUT_BUFFER_MASK;
     if (n == 0) {
-        debug_print(RED, "\nError: input buffer is full!");
+        if (g_debug) debug_print(RED, "\nError: input buffer is full!");
+        debug_file("Error: input buffer is full!");
         return;
     }
     ZeroMemory(&input_buffer->inputs[index], sizeof(INPUT));
@@ -173,7 +174,8 @@ void buttons_send(struct MouseState * state, int remap_id, struct InputBuffer * 
             n = input_buffer_move_prod_head(input_buffer, &tail);
             index = tail & INPUT_BUFFER_MASK;
             if (n == 0) {
-                debug_print(RED, "\nError: input buffer is full!");
+                if (g_debug) debug_print(RED, "\nError: input buffer is full!");
+                debug_file("Error: input buffer is full!");
                 return;
             }
             ZeroMemory(&input_buffer->inputs[index], sizeof(INPUT));
@@ -205,7 +207,8 @@ void move_send(struct MouseState * state, int remap_id, struct InputBuffer * inp
     n = input_buffer_move_prod_head(input_buffer, &tail);
     index = tail & INPUT_BUFFER_MASK;
     if (n == 0) {
-        debug_print(RED, "\nError: input buffer is full!");
+        if (g_debug) debug_print(RED, "\nError: input buffer is full!");
+        debug_file("Error: input buffer is full!");
         return;
     }
     ZeroMemory(&input_buffer->inputs[index], sizeof(INPUT));
@@ -282,7 +285,8 @@ void move_send(struct MouseState * state, int remap_id, struct InputBuffer * inp
             n = input_buffer_move_prod_head(input_buffer, &tail);
             index = tail & INPUT_BUFFER_MASK;
             if (n == 0) {
-                debug_print(RED, "\nError: input buffer is full!");
+                if (g_debug) debug_print(RED, "\nError: input buffer is full!");
+                debug_file("Error: input buffer is full!");
                 return;
             }
             ZeroMemory(&input_buffer->inputs[index], sizeof(INPUT));

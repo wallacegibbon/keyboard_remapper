@@ -1,9 +1,10 @@
-#define VERSION "1.1.1"
+#define VERSION "1.1.2"
 
 #include <windows.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <time.h>
 #include "input.h"
 #include "keys.c"
 #include "remap.c"
@@ -19,6 +20,20 @@ HHOOK g_mouse_hook;
 HANDLE ghEvent;
 HANDLE ghTimerQueue = NULL;
 struct InputBuffer g_input_buffer;
+
+void debug_file(const char * message) {
+    FILE * log_file = fopen("debug.log", "a");
+    if (log_file == NULL) {
+        return;
+    }
+
+    time_t now = time(NULL);
+    char * timestamp = ctime(&now);
+    timestamp[strlen(timestamp) - 1] = '\0';
+
+    fprintf(log_file, "[%s] %s\n", timestamp, message);
+    fclose(log_file);
+}
 
 void debug_print(const char * color, const char * format, ...) {
     va_list args;
@@ -38,7 +53,8 @@ void send_input(int scan_code, int virt_code, enum Direction direction, int rema
         n = input_buffer_move_prod_head(input_buffer, &tail);
         index = tail & INPUT_BUFFER_MASK;
         if (n == 0) {
-            debug_print(RED, "\nError: input buffer is full!");
+            if (g_debug) debug_print(RED, "\nError: input buffer is full!");
+            debug_file("Error: input buffer is full!");
             return;
         }
         ZeroMemory(&input_buffer->inputs[index], sizeof(INPUT));
@@ -92,7 +108,8 @@ LRESULT CALLBACK mouse_callback(int msg_code, WPARAM w_param, LPARAM l_param) {
             n = input_buffer_move_prod_head(&g_input_buffer, &tail);
             index = tail & INPUT_BUFFER_MASK;
             if (n == 0) {
-                debug_print(RED, "\nError: input buffer is full!");
+                if (g_debug) debug_print(RED, "\nError: input buffer is full!");
+                debug_file("Error: input buffer is full!");
                 return 1;
             }
             ZeroMemory(&g_input_buffer.inputs[index], sizeof(INPUT));
