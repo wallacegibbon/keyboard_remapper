@@ -2,7 +2,7 @@ remap_key=SPACE
 when_alone=SPACE
 with_other=LEFT_CTRL
 hold_delay=0
-tap_timeout=300
+tap_timeout=200
 
 remap_key=CAPSLOCK
 when_alone=ESCAPE
