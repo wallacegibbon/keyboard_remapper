@@ -1,3 +1,3 @@
 ﻿<^Tab::AltTab
-^1::Send "^{Space}"
+^\::Send "^{Space}"
 ^`::Send "^{Esc}"
